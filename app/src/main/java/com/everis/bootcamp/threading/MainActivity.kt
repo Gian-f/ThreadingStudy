@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.core.view.isVisible
 import kotlinx.android.synthetic.main.activity_main.*
+import com.everis.bootcamp.threading.AstroPeople as AstroPeople
 
 class MainActivity : AppCompatActivity() {
 
@@ -13,22 +14,54 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        //TODO: 018 - fazer o handle do clique do botão
+
+        button_load_data.setOnClickListener {
+            launchAstroTask()
+        }
     }
 
 
-    //TODO: 013 - Criar função para exibir os dados carregados
+    fun showData(list: List<AstroPeople>?) {
+        textview_data.text = ""
+        list?.forEach { people ->
+
+            textview_data.append("${people.name} - ${people.craft} \n\n")
+        }
+    }
+
+    fun showLoadingIndicator() {
+        progress_bar_load_indicator.visibility = View.VISIBLE
+    }
+
+    fun hideLoadingIndicator() {
+        progress_bar_load_indicator.visibility = View.GONE
+    }
+
+    fun launchAstroTask() {
+        val task = TaskAstros()
+        task.execute()
+    }
 
 
-    //TODO: 014 - Criar função para exibir a ProgressBar
+    inner class TaskAstros() : AsyncTask<Void,Int, List<AstroPeople>>() {
+    private val repository = AstrosRepository()
 
+        override fun onPreExecute() {
+            super.onPreExecute()
+            showLoadingIndicator()
+        }
+        override fun onProgressUpdate(vararg values : Int?) {
+            super.onProgressUpdate(*values)
 
-    //TODO: 015 - Criar função para esconder a ProgressBar
+        }
+        override fun doInBackground(vararg p0 : Void?) : List<AstroPeople>? {
+            return repository.loadData()
+        }
 
-
-    //TODO: 017 - Criar função para lançar a Task
-
-
-    //TODO: 016 - Criar classe interna para rodar a tarefa assincrona
-
+        override fun onPostExecute(result : List<AstroPeople>?) {
+            super.onPostExecute(result)
+            hideLoadingIndicator()
+            showData(result)
+        }
+    }
 }
